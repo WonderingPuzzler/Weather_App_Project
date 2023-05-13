@@ -5,8 +5,12 @@ import json
 
 
 class GUI:
-    def __init__(self, window):
+    def __init__(self, window: Tk) -> None:
+        """
+        Creates first GUI section and asks user what type of forecast they want
 
+        :param window: Connects GUI elements to the main Tkinter window
+        """
 
         self.api_key = 'a756d79cb586aea74ab654ea947af540' #API Key gotten from OpenWeatherMap.org using free account
 
@@ -20,7 +24,12 @@ class GUI:
         self.button_current = Button(window, text='Current Weather', font=('Arial Bold', 12), bg='#FFDF57', command=lambda: self.current_weather_cord(window))
         self.button_current.place(x=810, y=460, width=300, height=100)
 
-    def five_day_weather_cord(self, window):
+    def five_day_weather_cord(self, window: Tk) -> None:
+        """
+        Gets the coordinates needed for a 5-day weather forecast and creates the GUI necessary to get the information
+
+        :param window: Connects GUI elements to main Tkinter window
+        """
 
         self.next_screen(window)
         self.new_canvas(window)
@@ -56,7 +65,12 @@ class GUI:
 
 
 
-    def current_weather_cord(self, window):
+    def current_weather_cord(self, window: Tk) -> None:
+        """
+        Gets the weather coordinates for a current weather forecast and makes the GUI that gets this information
+
+        :param window: Connects GUI elements to main Tkinter window
+        """
         self.next_screen(window)
         self.new_canvas(window)
 
@@ -93,7 +107,12 @@ class GUI:
 
 
 
-    def five_day_date(self, window):
+    def five_day_date(self, window: Tk) -> None:
+        """
+        Makes the GUI to get the current date and time for 5-day forecast, so as to allow for the necessary .json() information to be taken also checks to make sure longitude and latitude is usable for forecast
+
+        :param window: Connects GUI elements to main Tkinter window
+        """
 
         if self.five_input_latitude.get().replace('.','').replace('-','').isnumeric() == False or self.five_input_longitude.get().replace('.','').replace('-','').isnumeric() == False:
             self.five_input_latitude.delete(0, END)
@@ -146,7 +165,14 @@ class GUI:
                 self.button_continue.place(x=830, y=490, width=300, height=100)
 
 
-    def current_date(self, window):
+    def current_date(self, window: Tk) -> None:
+        """
+        Makes the GUI to get the current date and time for current weather forecast, so as to allow for the necessary .json() information to be taken also checks to make sure longitude and latitude is usable for forecast
+
+        :param window: Connects GUI elements to main Tkinter window
+        """
+
+
         if self.input_latitude.get().replace('.','').replace('-','').isnumeric() == False or self.input_longitude.get().replace('.','').replace('-','').isnumeric() == False:
             self.input_latitude.delete(0, END)
             self.input_longitude.delete(0, END)
@@ -195,7 +221,12 @@ class GUI:
 
 
 
-    def five_day_weather(self, window):
+    def five_day_weather(self, window: Tk) -> None:
+        """
+        Creates the GUI and runs actions to create the five-day weather forecast, as well as allowing the user to go back or go find the current weather, changing measurement based on Fahrenheit or Celsius
+
+        :param window: Connects GUI elements to main Tkinter window
+        """
 
 
         if len(self.input_day.get()) != 2 or self.input_day.get().isnumeric() == False or len(self.input_month.get()) != 2 or self.input_month.get().isnumeric() == False or len(self.input_year.get()) != 4 or self.input_year.get().isnumeric() == False:
@@ -286,7 +317,15 @@ class GUI:
             self.button_more_city = Button(window, text='Current Weather', font=('Arial Bold', 12), bg='#FFDF57', command=lambda: self.current_weather_cord(window))
             self.button_more_city.place(x=880, y=550, width=300, height=50)
 
-    def current_weather(self, window):
+
+
+    def current_weather(self, window: Tk) -> None:
+        """
+        Creates the GUI and runs actions to create the current weather forecast, as well as allowing the user to go back or go find the 5-day weather, changing measurement based on Fahrenheit or Celsius
+
+        :param window: Connects GUI elements to main Tkinter window
+        """
+
         if len(self.input_day.get()) != 2 or self.input_day.get().isnumeric() == False or len(self.input_month.get()) != 2 or self.input_month.get().isnumeric() == False or len(self.input_year.get()) != 4 or self.input_year.get().isnumeric() == False:
             self.input_year.delete(0, END)
             self.input_month.delete(0, END)
@@ -352,16 +391,29 @@ class GUI:
             self.button_more_city = Button(window, text='Another City', font=('Arial Bold', 12), bg='#FFDF57', command=lambda: self.current_weather_cord(window))
             self.button_more_city.place(x=880, y=550, width=300, height=50)
 
-    def next_screen(self, window):
+    def next_screen(self, window: Tk) -> None:
+        """
+        Destroys the canvas and widgets so a new screen can be made
+        :param window: connects GUI actions to main Tk window
+        """
         self.canvas.destroy()
         [widget.destroy() for widget in window.winfo_children()]
 
 
-    def new_canvas(self, window):
+    def new_canvas(self, window: Tk) -> None:
+        """
+        Creates a new canvas so new widgets and screen GUI can be made
+        :param window: connects GUI actions to main Tk window
+        """
         self.canvas = Canvas(window, width=1150, height=600, bg='#2998D8')
         self.canvas.pack()
 
-    def create_intro_again(self, window):
+    def create_intro_again(self, window: Tk) -> None:
+        """
+        Creates intro again since __init__ cannot be called multiple times, and so user can go back to start screen again
+        :param window: connects GUI actions to main Tk window
+        """
+
         self.next_screen(window)
         self.new_canvas(window)
         self.canvas.create_text(570, 50, text="    GET WEATHER!\n         ANYTIME!", fill="BLACK", font=("Arial", 25), anchor="center")
