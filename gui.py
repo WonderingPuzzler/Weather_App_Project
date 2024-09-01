@@ -139,7 +139,8 @@ class GUI:
                 self.next_screen(window)
                 self.new_canvas(window)
 
-                self.canvas.create_text(590, 75, text="TYPE TODAY'S DATE (DD/MM/YYYY) \nDO NOT CHOOSE DATES THAT WOULD \nMAKE IT ROLL OVER TO THE \nNEXT MONTH!", fill="BLACK", font=("Arial", 20), anchor="center")
+                self.canvas.create_text(590, 50, text="TYPE TODAY'S DATE (DD/MM/YYYY)", fill="BLACK", font=("Arial", 20), anchor="center")
+                self.canvas.create_text(590, 85, text="(ONLY SHOWS DAYS WITHIN CURRENT MONTH)", fill="BLACK", font=("Arial", 20), anchor="center")
 
                 self.label_day = Label(window, text='DAY', font=('Arial Bold', 20), bg='#2998D8')
                 self.label_day.place(x=535, y=125)
@@ -172,7 +173,6 @@ class GUI:
 
         :param window: Connects GUI elements to main Tkinter window
         """
-
 
         if self.input_latitude.get().replace('.','').replace('-','').isnumeric() == False or self.input_longitude.get().replace('.','').replace('-','').isnumeric() == False:
             self.input_latitude.delete(0, END)
@@ -213,9 +213,17 @@ class GUI:
         :param window: Connects GUI elements to main Tkinter window
         """
 
+        self.weather_days = 0
+
         self.today_date = date.today()
         self.input_date = f'{self.input_year.get()}-{self.input_month.get()}-{self.input_day.get()}'
 
+        try:
+            self.input_date = date.fromisoformat(self.input_date)
+        except :
+            self.input_year.delete(0, END)
+            self.input_month.delete(0, END)
+            self.input_day.delete(0, END)
 
         if len(self.input_day.get()) != 2 or self.input_day.get().isnumeric() == False or len(self.input_month.get()) != 2 or self.input_month.get().isnumeric() == False or len(self.input_year.get()) != 4 or self.input_year.get().isnumeric() == False:
             self.input_year.delete(0, END)
@@ -227,22 +235,25 @@ class GUI:
             self.input_month.delete(0, END)
             self.input_day.delete(0, END)
 
-        elif self.input_month.get() in ['04', '06', '09', '11'] and self.input_day.get() >= '27':
-            self.input_year.delete(0, END)
-            self.input_month.delete(0, END)
-            self.input_day.delete(0, END)
-
-        elif self.input_month.get() in ['01', '03', '05', '07', '08', '10', '12'] and self.input_day.get() >= '28':
-            self.input_year.delete(0, END)
-            self.input_month.delete(0, END)
-            self.input_day.delete(0, END)
-
-        elif self.input_month.get() == '02' and self.input_day.get() >= '25':
+        elif self.input_month.get() == '02' and self.input_day.get() == '29':
             self.input_year.delete(0, END)
             self.input_month.delete(0, END)
             self.input_day.delete(0, END)
 
         else:
+            if self.input_month.get() in ['01', '03', '05', '07', '08', '10','12'] and self.input_day.get() == '31' or self.input_month.get() in ['04', '06', '09', '11'] and self.input_day.get() == '30' or self.input_month.get() == '02' and self.input_day.get() == '28':
+                self.weather_days = 1
+
+            elif self.input_month.get() in ['01', '03', '05', '07', '08', '10','12'] and self.input_day.get() == '30' or self.input_month.get() in ['04', '06', '09', '11'] and self.input_day.get() == '29' or self.input_month.get() == '02' and self.input_day.get() == '27':
+                self.weather_days = 2
+
+            elif self.input_month.get() in ['01', '03', '05', '07', '08', '10','12'] and self.input_day.get() == '29' or self.input_month.get() in ['04', '06', '09', '11'] and self.input_day.get() == '28' or self.input_month.get() == '02' and self.input_day.get() == '26':
+                self.weather_days = 3
+
+            elif self.input_month.get() in ['01', '03', '05', '07', '08', '10','12'] and self.input_day.get() == '28' or self.input_month.get() in ['04', '06', '09', '11'] and self.input_day.get() == '27' or self.input_month.get() == '02' and self.input_day.get() == '25':
+                self.weather_days = 4
+
+
             self.year = self.input_year.get()
             self.year = int(self.year)
             self.month = self.input_month.get()
@@ -250,7 +261,7 @@ class GUI:
             self.day = self.input_day.get()
             self.day = int(self.day)
 
-            self.hour = '10:00:00'
+            self.hour = '06:00:00'
 
             self.next_screen(window)
             self.new_canvas(window)
@@ -273,8 +284,6 @@ class GUI:
                     else:
                         self.month_2 = self.month
 
-
-
                     self.time = f"{self.year}-{self.month_2}-{self.day_2} {self.hour}" #Help in knowledge of how to extract parts of .json gained from https://www.youtube.com/watch?v=baWzHKfrvqw
                     for forecast in self.data['list']:
                         if forecast['dt_txt'] == self.time:
@@ -284,13 +293,29 @@ class GUI:
                             self.weather_list.append(forecast['weather'][0]['main']) #Similar code can be found in https://www.youtube.com/watch?v=baWzHKfrvqw
                             break
 
-                self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°F\n\n{self.temp_min_list[0]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
-                self.canvas.create_text(335, 300, text=f"{self.weather_list[1]}\n\n\nDay 2\n\n{self.temp_list[1]}°F\n\n{self.temp_min_list[1]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
-                self.canvas.create_text(560, 300, text=f"{self.weather_list[2]}\n\n\nDay 3\n\n{self.temp_list[2]}°F\n\n{self.temp_min_list[2]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
-                self.canvas.create_text(785, 300, text=f"{self.weather_list[3]}\n\n\nDay 4\n\n{self.temp_list[3]}°F\n\n{self.temp_min_list[3]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
-                self.canvas.create_text(1010, 300, text=f"{self.weather_list[4]}\n\n\nDay 5\n\n{self.temp_list[4]}°F\n\n{self.temp_min_list[4]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                if self.weather_days == 1:
+                    self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°F\n\n{self.temp_min_list[0]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
 
+                elif self.weather_days == 2:
+                    self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°F\n\n{self.temp_min_list[0]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(335, 300, text=f"{self.weather_list[1]}\n\n\nDay 2\n\n{self.temp_list[1]}°F\n\n{self.temp_min_list[1]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
 
+                elif self.weather_days == 3:
+                    self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°F\n\n{self.temp_min_list[0]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(335, 300, text=f"{self.weather_list[1]}\n\n\nDay 2\n\n{self.temp_list[1]}°F\n\n{self.temp_min_list[1]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(560, 300, text=f"{self.weather_list[2]}\n\n\nDay 3\n\n{self.temp_list[2]}°F\n\n{self.temp_min_list[2]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+
+                elif self.weather_days == 4:
+                    self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°F\n\n{self.temp_min_list[0]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(335, 300, text=f"{self.weather_list[1]}\n\n\nDay 2\n\n{self.temp_list[1]}°F\n\n{self.temp_min_list[1]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(560, 300, text=f"{self.weather_list[2]}\n\n\nDay 3\n\n{self.temp_list[2]}°F\n\n{self.temp_min_list[2]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(785, 300, text=f"{self.weather_list[3]}\n\n\nDay 4\n\n{self.temp_list[3]}°F\n\n{self.temp_min_list[3]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                else:
+                    self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°F\n\n{self.temp_min_list[0]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(335, 300, text=f"{self.weather_list[1]}\n\n\nDay 2\n\n{self.temp_list[1]}°F\n\n{self.temp_min_list[1]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(560, 300, text=f"{self.weather_list[2]}\n\n\nDay 3\n\n{self.temp_list[2]}°F\n\n{self.temp_min_list[2]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(785, 300, text=f"{self.weather_list[3]}\n\n\nDay 4\n\n{self.temp_list[3]}°F\n\n{self.temp_min_list[3]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(1010, 300, text=f"{self.weather_list[4]}\n\n\nDay 5\n\n{self.temp_list[4]}°F\n\n{self.temp_min_list[4]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
 
             else:
                 self.weather_data = requests.get(f"https://api.openweathermap.org/data/2.5/forecast?lat={float(self.latitude)}&lon={float(self.longitude)}&units=metric&appid={self.api_key}") #API code once again gotten from https://openweathermap.org/forecast5
@@ -300,7 +325,7 @@ class GUI:
                     self.day_2 = str(int(self.day) + i)
                     if self.month < 10:
                         self.month_2 = str(0) + str(self.month)
-                    elif self.day < 10:
+                    if self.day < 10:
                         self.day_2 = str(0) + str(int(self.day) + i)
                     else:
                         self.month_2 = self.month
@@ -313,11 +338,30 @@ class GUI:
                             self.weather_list.append(forecast['weather'][0]['main'])
                             break
 
-                self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°C\n\n{self.temp_min_list[0]}°C", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
-                self.canvas.create_text(335, 300, text=f"{self.weather_list[1]}\n\n\nDay 2\n\n{self.temp_list[1]}°C\n\n{self.temp_min_list[1]}°C", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
-                self.canvas.create_text(560, 300, text=f"{self.weather_list[2]}\n\n\nDay 3\n\n{self.temp_list[2]}°C\n\n{self.temp_min_list[2]}°C", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
-                self.canvas.create_text(785, 300, text=f"{self.weather_list[3]}\n\n\nDay 4\n\n{self.temp_list[3]}°C\n\n{self.temp_min_list[3]}°C", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
-                self.canvas.create_text(1010, 300, text=f"{self.weather_list[4]}\n\n\nDay 5\n\n{self.temp_list[4]}°C\n\n{self.temp_min_list[4]}°C", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                if self.weather_days == 1:
+                    self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°C\n\n{self.temp_min_list[0]}°C", fill="#FFDF57", font=("Arial Bold", 30), anchor="center")
+
+                elif self.weather_days == 2:
+                    self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°C\n\n{self.temp_min_list[0]}°C", fill="#FFDF57", font=("Arial Bold", 30), anchor="center")
+                    self.canvas.create_text(335, 300, text=f"{self.weather_list[1]}\n\n\nDay 2\n\n{self.temp_list[1]}°C\n\n{self.temp_min_list[1]}°C", fill="#FFDF57", font=("Arial Bold", 30), anchor="center")
+
+                elif self.weather_days == 3:
+                    self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°C\n\n{self.temp_min_list[0]}°C", fill="#FFDF57", font=("Arial Bold", 30), anchor="center")
+                    self.canvas.create_text(335, 300, text=f"{self.weather_list[1]}\n\n\nDay 2\n\n{self.temp_list[1]}°C\n\n{self.temp_min_list[1]}°C", fill="#FFDF57", font=("Arial Bold", 30), anchor="center")
+                    self.canvas.create_text(560, 300, text=f"{self.weather_list[2]}\n\n\nDay 3\n\n{self.temp_list[2]}°C\n\n{self.temp_min_list[2]}°C", fill="#FFDF57", font=("Arial Bold", 30), anchor="center")
+
+                elif self.weather_days == 4:
+                    self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°C\n\n{self.temp_min_list[0]}°C", fill="#FFDF57", font=("Arial Bold", 30), anchor="center")
+                    self.canvas.create_text(335, 300, text=f"{self.weather_list[1]}\n\n\nDay 2\n\n{self.temp_list[1]}°C\n\n{self.temp_min_list[1]}°C", fill="#FFDF57", font=("Arial Bold", 30), anchor="center")
+                    self.canvas.create_text(560, 300, text=f"{self.weather_list[2]}\n\n\nDay 3\n\n{self.temp_list[2]}°C\n\n{self.temp_min_list[2]}°C", fill="#FFDF57", font=("Arial Bold", 30), anchor="center")
+                    self.canvas.create_text(785, 300, text=f"{self.weather_list[3]}\n\n\nDay 4\n\n{self.temp_list[3]}°C\n\n{self.temp_min_list[3]}°C", fill="#FFDF57", font=("Arial Bold", 30), anchor="center")
+
+                else:
+                    self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°C\n\n{self.temp_min_list[0]}°C", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(335, 300, text=f"{self.weather_list[1]}\n\n\nDay 2\n\n{self.temp_list[1]}°C\n\n{self.temp_min_list[1]}°C", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(560, 300, text=f"{self.weather_list[2]}\n\n\nDay 3\n\n{self.temp_list[2]}°C\n\n{self.temp_min_list[2]}°C", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(785, 300, text=f"{self.weather_list[3]}\n\n\nDay 4\n\n{self.temp_list[3]}°C\n\n{self.temp_min_list[3]}°C", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
+                    self.canvas.create_text(1010, 300, text=f"{self.weather_list[4]}\n\n\nDay 5\n\n{self.temp_list[4]}°C\n\n{self.temp_min_list[4]}°C", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
 
             self.button_five_day = Button(window, text='More 5-Day Weather', font=('Arial Bold', 12), bg='#FFDF57', command=lambda: self.five_day_weather_cord(window))
             self.button_five_day.place(x=20, y=550, width=300, height=50)
@@ -362,6 +406,12 @@ class GUI:
             self.canvas.create_text(950, 150, text=f"Wind Speed: {self.wind_speed}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
             self.canvas.create_text(550, 300, text=f"{self.temp}°F", fill="BLACK", font=("Arial Bold", 28), anchor="center")
             self.canvas.create_text(550, 225, text=f"{self.weather}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+
+            self.button_five_day = Button(window, text='5-Day Weather', font=('Arial Bold', 12), bg='#FFDF57', command=lambda: self.five_day_weather_cord(window))
+            self.button_five_day.place(x=20, y=550, width=300, height=50)
+
+            self.button_more_city = Button(window, text='Another City', font=('Arial Bold', 12), bg='#FFDF57', command=lambda: self.current_weather_cord(window))
+            self.button_more_city.place(x=880, y=550, width=300, height=50)
 
         else:
             self.weather_data = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={self.latitude}&lon={self.longitude}&units=metric&appid={self.api_key}") # API code can be found at https://openweathermap.org/current
