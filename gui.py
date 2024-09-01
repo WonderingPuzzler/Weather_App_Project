@@ -1,6 +1,7 @@
 from tkinter import *
 import requests
 import json
+from datetime import date
 
 
 
@@ -109,7 +110,7 @@ class GUI:
 
     def five_day_date(self, window: Tk) -> None:
         """
-        Makes the GUI to get the current date and time for 5-day forecast, so as to allow for the necessary .json() information to be taken also checks to make sure longitude and latitude is usable for forecast
+        Has the GUI get the current date and time for 5-day forecast, so as to allow for the necessary .json() information to be taken. Also checks to make sure longitude and latitude is usable for forecast
 
         :param window: Connects GUI elements to main Tkinter window
         """
@@ -138,7 +139,7 @@ class GUI:
                 self.next_screen(window)
                 self.new_canvas(window)
 
-                self.canvas.create_text(590, 50, text="TYPE IN THE DATE (DD/MM/YYYY)", fill="BLACK", font=("Arial", 20), anchor="center")
+                self.canvas.create_text(590, 75, text="TYPE TODAY'S DATE (DD/MM/YYYY) \nDO NOT CHOOSE DATES THAT WOULD \nMAKE IT ROLL OVER TO THE \nNEXT MONTH!", fill="BLACK", font=("Arial", 20), anchor="center")
 
                 self.label_day = Label(window, text='DAY', font=('Arial Bold', 20), bg='#2998D8')
                 self.label_day.place(x=535, y=125)
@@ -193,25 +194,9 @@ class GUI:
                 self.next_screen(window)
                 self.new_canvas(window)
 
-                self.canvas.create_text(590, 50, text="TYPE IN THE DATE (DD/MM/YYYY)", fill="BLACK", font=("Arial", 20), anchor="center")
+                self.canvas.create_text(590, 50, text="          CURRENT WEATHER GENERATING, \nPRESS CONTINUE BUTTON TO GAIN WEATHER INFO", fill="BLACK", font=("Arial", 20), anchor="center")
 
-                self.label_day = Label(window, text='DAY', font=('Arial Bold', 20), bg='#2998D8')
-                self.label_day.place(x=535, y=125)
-                self.input_day = Entry(window)
-                self.input_day.configure(font=('Arial Bold', 18))
-                self.input_day.place(x=0, y=175, width=1150, height=50)
-
-                self.label_month = Label(window, text='MONTH', font=('Arial Bold', 20), bg='#2998D8')
-                self.label_month.place(x=510, y=240)
-                self.input_month = Entry(window)
-                self.input_month.configure(font=('Arial Bold', 18))
-                self.input_month.place(x=0, y=290, width=1150, height=50)
-
-                self.label_year = Label(window, text='YEAR', font=('Arial Bold', 20), bg='#2998D8')
-                self.label_year.place(x=520, y=355)
-                self.input_year = Entry(window)
-                self.input_year.configure(font=('Arial Bold', 18))
-                self.input_year.place(x=0, y=405, width=1150, height=50)
+                self.canvas.create_oval(370, 110, 770, 450, fill="#FFDF57", outline="#FFDF57")
 
                 self.button_back = Button(window, text='Back', font=('Arial Bold', 12), bg='#FFDF57', command=lambda: self.current_weather_cord(window))
                 self.button_back.place(x=20, y=490, width=300, height=100)
@@ -228,8 +213,31 @@ class GUI:
         :param window: Connects GUI elements to main Tkinter window
         """
 
+        self.today_date = date.today()
+        self.input_date = f'{self.input_year.get()}-{self.input_month.get()}-{self.input_day.get()}'
+
 
         if len(self.input_day.get()) != 2 or self.input_day.get().isnumeric() == False or len(self.input_month.get()) != 2 or self.input_month.get().isnumeric() == False or len(self.input_year.get()) != 4 or self.input_year.get().isnumeric() == False:
+            self.input_year.delete(0, END)
+            self.input_month.delete(0, END)
+            self.input_day.delete(0, END)
+
+        elif self.today_date != self.input_date:
+            self.input_year.delete(0, END)
+            self.input_month.delete(0, END)
+            self.input_day.delete(0, END)
+
+        elif self.input_month.get() in ['04', '06', '09', '11'] and self.input_day.get() >= '27':
+            self.input_year.delete(0, END)
+            self.input_month.delete(0, END)
+            self.input_day.delete(0, END)
+
+        elif self.input_month.get() in ['01', '03', '05', '07', '08', '10', '12'] and self.input_day.get() >= '28':
+            self.input_year.delete(0, END)
+            self.input_month.delete(0, END)
+            self.input_day.delete(0, END)
+
+        elif self.input_month.get() == '02' and self.input_day.get() >= '25':
             self.input_year.delete(0, END)
             self.input_month.delete(0, END)
             self.input_day.delete(0, END)
@@ -242,7 +250,7 @@ class GUI:
             self.day = self.input_day.get()
             self.day = int(self.day)
 
-            self.hour = '06:00:00'
+            self.hour = '10:00:00'
 
             self.next_screen(window)
             self.new_canvas(window)
@@ -256,15 +264,16 @@ class GUI:
                 self.weather_data = requests.get(f"https://api.openweathermap.org/data/2.5/forecast?lat={float(self.latitude)}&lon={float(self.longitude)}&units=imperial&appid={self.api_key}") #5-day weather request gotten from https://openweathermap.org/forecast5
                 self.data = self.weather_data.json() #Knowledge of .json() and interaction with openweathermap.org gotten from https://www.youtube.com/watch?v=baWzHKfrvqw
 
-
                 for i in range(6):
                     self.day_2 = int(self.day) + i
                     if self.month < 10:
                         self.month_2 = str(0) + str(self.month)
-                    elif self.day < 10:
+                    if self.day < 10:
                         self.day_2 = str(0) + str(int(self.day) + i)
                     else:
                         self.month_2 = self.month
+
+
 
                     self.time = f"{self.year}-{self.month_2}-{self.day_2} {self.hour}" #Help in knowledge of how to extract parts of .json gained from https://www.youtube.com/watch?v=baWzHKfrvqw
                     for forecast in self.data['list']:
@@ -273,7 +282,6 @@ class GUI:
                             self.temp_list.append(forecast['main']['temp']) #Similar code can be found in https://www.youtube.com/watch?v=baWzHKfrvqw
                             self.temp_min_list.append(forecast['main']['temp_min']) #Similar code can be found in https://www.youtube.com/watch?v=baWzHKfrvqw
                             self.weather_list.append(forecast['weather'][0]['main']) #Similar code can be found in https://www.youtube.com/watch?v=baWzHKfrvqw
-
                             break
 
                 self.canvas.create_text(110, 300, text=f"{self.weather_list[0]}\n\n\nDay 1\n\n{self.temp_list[0]}°F\n\n{self.temp_min_list[0]}°F", fill="#FFDF57", font=("Arial Bold", 30),anchor="center")
@@ -326,64 +334,58 @@ class GUI:
         :param window: Connects GUI elements to main Tkinter window
         """
 
-        if len(self.input_day.get()) != 2 or self.input_day.get().isnumeric() == False or len(self.input_month.get()) != 2 or self.input_month.get().isnumeric() == False or len(self.input_year.get()) != 4 or self.input_year.get().isnumeric() == False:
-            self.input_year.delete(0, END)
-            self.input_month.delete(0, END)
-            self.input_day.delete(0, END)
+        self.next_screen(window)
+        self.new_canvas(window)
+
+
+        if self.measurement.get() == 'FAHRENHEIT':
+            self.weather_data = requests.get( # API code can be found at https://openweathermap.org/current
+                f"https://api.openweathermap.org/data/2.5/weather?lat={self.latitude}&lon={self.longitude}&units=imperial&appid={self.api_key}")
+            self.data = self.weather_data.json() #Knowledge of .json() and interaction with openweathermap.org gotten from https://www.youtube.com/watch?v=baWzHKfrvqw
+
+
+            self.temp = self.data['main']['temp'] #Similar code found in https://www.youtube.com/watch?v=baWzHKfrvqw; help with navigating .json() file
+            self.feels_like = self.data['main']['feels_like']
+            self.humidity = self.data['main']['humidity']
+            self.air_pressure = self.data['main']['pressure']
+            self.weather = self.data['weather'][0]['main']
+            self.wind_speed = self.data['wind']['speed']
+            self.cloud_percentage = self.data['clouds']['all']
+            self.city = self.data['name']
+            self.country = self.data['sys']['country']
+
+            self.canvas.create_text(500, 50, text=f'CURRENT WEATHER IN {self.city}, {self.country}', font=("Arial Bold", 30), anchor="center" )
+            self.canvas.create_text(200, 150, text=f"Feels Like: {self.feels_like}°F", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+            self.canvas.create_text(175, 500, text=f"Air Pressure: {self.air_pressure}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+            self.canvas.create_text(620, 500, text=f"Cloud Percentage: {self.cloud_percentage}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+            self.canvas.create_text(1025, 500, text=f"Humidity: {self.humidity}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+            self.canvas.create_text(950, 150, text=f"Wind Speed: {self.wind_speed}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+            self.canvas.create_text(550, 300, text=f"{self.temp}°F", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+            self.canvas.create_text(550, 225, text=f"{self.weather}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+
         else:
-
-            self.next_screen(window)
-            self.new_canvas(window)
-
-
-            if self.measurement.get() == 'FAHRENHEIT':
-                self.weather_data = requests.get( # API code can be found at https://openweathermap.org/current
-                    f"https://api.openweathermap.org/data/2.5/weather?lat={self.latitude}&lon={self.longitude}&units=imperial&appid={self.api_key}")
-                self.data = self.weather_data.json() #Knowledge of .json() and interaction with openweathermap.org gotten from https://www.youtube.com/watch?v=baWzHKfrvqw
+            self.weather_data = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={self.latitude}&lon={self.longitude}&units=metric&appid={self.api_key}") # API code can be found at https://openweathermap.org/current
+            self.data = self.weather_data.json() #Knowledge of .json() and interaction with openweathermap.org gotten from https://www.youtube.com/watch?v=baWzHKfrvqw
 
 
-                self.temp = self.data['main']['temp'] #Similar code found in https://www.youtube.com/watch?v=baWzHKfrvqw; help with navigating .json() file
-                self.feels_like = self.data['main']['feels_like']
-                self.humidity = self.data['main']['humidity']
-                self.air_pressure = self.data['main']['pressure']
-                self.weather = self.data['weather'][0]['main']
-                self.wind_speed = self.data['wind']['speed']
-                self.cloud_percentage = self.data['clouds']['all']
-                self.city = self.data['name']
-                self.country = self.data['sys']['country']
+            self.temp = self.data['main']['temp'] #Similar code found in https://www.youtube.com/watch?v=baWzHKfrvqw; help with navigating .json() file
+            self.feels_like = self.data['main']['feels_like']
+            self.humidity = self.data['main']['humidity']
+            self.air_pressure = self.data['main']['pressure']
+            self.weather = self.data['weather'][0]['main']
+            self.wind_speed = self.data['wind']['speed']
+            self.cloud_percentage = self.data['clouds']['all']
+            self.city = self.data['name']
+            self.country = self.data['sys']['country']
 
-                self.canvas.create_text(500, 50, text=f'CURRENT WEATHER IN {self.city}, {self.country}', font=("Arial Bold", 30), anchor="center" )
-                self.canvas.create_text(200, 150, text=f"Feels Like: {self.feels_like}°F", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-                self.canvas.create_text(175, 500, text=f"Air Pressure: {self.air_pressure}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-                self.canvas.create_text(620, 500, text=f"Cloud Percentage: {self.cloud_percentage}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-                self.canvas.create_text(1025, 500, text=f"Humidity: {self.humidity}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-                self.canvas.create_text(950, 150, text=f"Wind Speed: {self.wind_speed}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-                self.canvas.create_text(550, 300, text=f"{self.temp}°F", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-                self.canvas.create_text(550, 225, text=f"{self.weather}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-
-            else:
-                self.weather_data = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={self.latitude}&lon={self.longitude}&units=metric&appid={self.api_key}") # API code can be found at https://openweathermap.org/current
-                self.data = self.weather_data.json() #Knowledge of .json() and interaction with openweathermap.org gotten from https://www.youtube.com/watch?v=baWzHKfrvqw
-
-
-                self.temp = self.data['main']['temp'] #Similar code found in https://www.youtube.com/watch?v=baWzHKfrvqw; help with navigating .json() file
-                self.feels_like = self.data['main']['feels_like']
-                self.humidity = self.data['main']['humidity']
-                self.air_pressure = self.data['main']['pressure']
-                self.weather = self.data['weather'][0]['main']
-                self.wind_speed = self.data['wind']['speed']
-                self.cloud_percentage = self.data['clouds']['all']
-                self.city = self.data['name']
-                self.country = self.data['sys']['country']
-
-                self.canvas.create_text(550, 50, text=f'CURRENT WEATHER IN {self.city}, {self.country}', font=("Arial Bold", 30), anchor="center")
-                self.canvas.create_text(200, 150, text=f"Feels Like: {self.feels_like}°C", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-                self.canvas.create_text(175, 500, text=f"Air Pressure: {self.air_pressure}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-                self.canvas.create_text(620, 500, text=f"Cloud Percentage: {self.cloud_percentage}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-                self.canvas.create_text(1025, 500, text=f"Humidity: {self.humidity}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-                self.canvas.create_text(950, 150, text=f"Wind Speed: {self.wind_speed}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-                self.canvas.create_text(550, 300, text=f"{self.temp}°C", fill="BLACK", font=("Arial Bold", 28), anchor="center")
-                self.canvas.create_text(550, 225, text=f"{self.weather}", fill="BLACK", font=("Arial Bold", 28),anchor="center")
+            self.canvas.create_text(550, 50, text=f'CURRENT WEATHER IN {self.city}, {self.country}', font=("Arial Bold", 30), anchor="center")
+            self.canvas.create_text(200, 150, text=f"Feels Like: {self.feels_like}°C", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+            self.canvas.create_text(175, 500, text=f"Air Pressure: {self.air_pressure}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+            self.canvas.create_text(620, 500, text=f"Cloud Percentage: {self.cloud_percentage}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+            self.canvas.create_text(1025, 500, text=f"Humidity: {self.humidity}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+            self.canvas.create_text(950, 150, text=f"Wind Speed: {self.wind_speed}", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+            self.canvas.create_text(550, 300, text=f"{self.temp}°C", fill="BLACK", font=("Arial Bold", 28), anchor="center")
+            self.canvas.create_text(550, 225, text=f"{self.weather}", fill="BLACK", font=("Arial Bold", 28),anchor="center")
 
             self.button_five_day = Button(window, text='5-Day Weather', font=('Arial Bold', 12), bg='#FFDF57', command=lambda: self.five_day_weather_cord(window))
             self.button_five_day.place(x=20, y=550, width=300, height=50)
