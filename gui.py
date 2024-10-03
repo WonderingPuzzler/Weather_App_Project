@@ -281,11 +281,14 @@ class GUI:
                         self.month_2 = str(0) + str(self.month)
                     if self.day < 10:
                         self.day_2 = str(0) + str(int(self.day) + i)
-                    else:
+                    if self.month >= 10 or self.day >= 10:
                         self.month_2 = self.month
+
+
 
                     self.time = f"{self.year}-{self.month_2}-{self.day_2} {self.hour}" #Help in knowledge of how to extract parts of .json gained from https://www.youtube.com/watch?v=baWzHKfrvqw
                     for forecast in self.data['list']:
+
                         if forecast['dt_txt'] == self.time:
 
                             self.temp_list.append(forecast['main']['temp']) #Similar code can be found in https://www.youtube.com/watch?v=baWzHKfrvqw
@@ -322,16 +325,17 @@ class GUI:
                 self.data = self.weather_data.json() #Knowledge of .json() and interaction with openweathermap.org gotten from https://www.youtube.com/watch?v=baWzHKfrvqw
 
                 for i in range(6):
-                    self.day_2 = str(int(self.day) + i)
+                    self.day_2 = int(self.day) + i
                     if self.month < 10:
                         self.month_2 = str(0) + str(self.month)
                     if self.day < 10:
                         self.day_2 = str(0) + str(int(self.day) + i)
-                    else:
+                    if self.month >= 10 or self.day >= 10:
                         self.month_2 = self.month
 
                     self.time = f"{self.year}-{self.month_2}-{self.day_2} {self.hour}" # Again, https://www.youtube.com/watch?v=baWzHKfrvqw helped with how to disect .json() giving code examples
                     for forecast in self.data['list']:
+
                         if forecast['dt_txt'] == self.time:
                             self.temp_list.append(forecast['main']['temp']) #Similar code can be found in https://www.youtube.com/watch?v=baWzHKfrvqw
                             self.temp_min_list.append(forecast['main']['temp_min'])
@@ -474,6 +478,9 @@ class GUI:
 
         self.button_5_day = Button(window, text='5-Day Weather', font=('Arial Bold', 12), bg='#FFDF57', command=lambda: self.five_day_weather_cord(window))
         self.button_5_day.place(x=40, y=460, width=300, height=100)
+
+        self.button_current = Button(window, text='Current Weather', font=('Arial Bold', 12), bg='#FFDF57',command=lambda: self.current_weather_cord(window))
+        self.button_current.place(x=810, y=460, width=300, height=100)
 
         self.button_current = Button(window, text='Current Weather', font=('Arial Bold', 12), bg='#FFDF57',command=lambda: self.current_weather_cord(window))
         self.button_current.place(x=810, y=460, width=300, height=100)
